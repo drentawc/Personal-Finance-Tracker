@@ -160,6 +160,8 @@ class GSheet:
 
                 yearPlot.createExpenseChart()
 
+                yearPlot.uploadToImgur()
+
 
     #Format sheets differently depending on sheet name
     def formatSheet(self, spreadsheet):

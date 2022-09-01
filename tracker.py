@@ -6,8 +6,8 @@
 # @Version 0.2 8/31/2022
 # Changelog:
 #   - Full uploading of accounts, organization of expenses as well as creating pie charts for data viewing.
-# To run on Mac: /Users/will/opt/miniconda3/envs/mint-tracker/bin/python /Users/will/Documents/GitHub/Personal-Finance-Tracker/tracker.py /Users/will/Documents/GitHub/Personal-Finance-Tracker/will.conf
-# To run on Linux: /home/will/miniconda3/envs/mint-tracker/bin/python /home/will/code/Personal-Finance-Tracker/tracker.py /home/will/code/Personal-Finance-Tracker/will.conf
+
+# To run on Linux: /miniconda3/envs/mint-tracker/bin/python tracker.py default.conf
 
 
 #Gameplan:
@@ -23,11 +23,6 @@
 #   - Uploading of plots to imgur to put into google sheet
 #   - Map out investment sheet
 #   - May want to move all of the dict creation to mint backend so that the functionality is more seperated
-
-
-# @TODO NEED TO REMOVE service.json from github repo
-
-
 
 
 
@@ -48,16 +43,17 @@ def main():
     
     config.read(args.config)
 
-    #mint = ""
-    #mint = MintBackend(config)
+    # #mint = ""
+    # mint = MintBackend(config)
 
     GSheet(MintBackend(config), config)
 
+
+    #Test upload
     # testDict = {"Total" : 1234.23333, "Groceries" : 555.05, "Electronics": 1.0000000000000000000000000000000000000006}
-
-    # asd = Plot(testDict, config['Imgur'])
-
+    # asd = Plot(testDict, config['Imgur'], "2022")
     # asd.createExpenseChart()
+    # print(asd.uploadToImgur())
 
 
 def setupArgparser():
