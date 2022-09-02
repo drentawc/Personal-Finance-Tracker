@@ -9,7 +9,6 @@
 
 #from oauth2client.service_account import ServiceAccountCredentials
 
-from wsgiref.handlers import format_date_time
 import pandas as pd
 import gspread as gs
 
@@ -73,12 +72,21 @@ class GSheet:
         self.headerFormat = gsformatting.cellFormat(textFormat=textFormat( fontSize=14, fontFamily='Bree Serif', bold=True), horizontalAlignment='CENTER')
         self.bodyFormat = gsformatting.cellFormat(textFormat=textFormat( fontSize=12, fontFamily='Bree Serif', bold=False), horizontalAlignment='CENTER')
 
-        #Generate all main sheets
         self.generateAccountSheet()
         self.generateExpenseSheet()
         self.generateInvestmentSheet()
 
-        self.sheet.reorder_worksheets( [self.accountSheet, self.expenseSheet, self.investmentSheet] )
+        #Generate all main sheets
+        # try:
+        #     self.generateAccountSheet()
+        #     self.generateExpenseSheet()
+        #     self.generateInvestmentSheet()
+
+        #     self.sheet.reorder_worksheets( [self.accountSheet, self.expenseSheet, self.investmentSheet] )
+        # except Exception as e:
+        #     print("Quota limit probably reached")
+        #     print(e)
+
 
         if mint != "":
             self.mint.mintAuth.close()
@@ -142,25 +150,47 @@ class GSheet:
 
         if self.checkSheet("Expenses"):
 
+            self.expenseCell = "C60"
+
             self.expenseSheet = self.sheet.get_worksheet_by_id(self.currentSheetNames['Expenses'])
 
             self.formatSheet(self.expenseSheet)
 
-            self.uploadTransactions(self.expenseSheet, "Expenses", "C30")
+            self.uploadTransactions(self.expenseSheet, "Expenses", self.expenseCell)
 
-            self.uploadPlots()
+            self.uploadPlots(self.expenseSheet)
 
     #Creates a Plot object to create pie charts, upload to imgur, and format on expenses sheet
-    def uploadPlots(self):
+    def uploadPlots(self, spreadsheet):
 
         for year in self.yearDict:
 
             if year == "2022":
                 yearPlot = Plot(self.yearDict[year], self.config['Imgur'], year)
 
-                yearPlot.createExpenseChart()
+                yearPlot.createExpenseChart("Yearly Expenses")
 
-                yearPlot.uploadToImgur()
+                currentUrl = yearPlot.uploadToImgur()
+
+                print(currentUrl)
+
+                plotCell = "{0}{1}".format(self.expenseCell[0], int(self.yearCell[1:3])-27)
+
+                print(plotCell)
+
+                imageString = "=IMAGE(\"{0}\")".format(currentUrl)
+
+                spreadsheet.merge_cells("{0}:{1}{2}".format(plotCell, "G", int(plotCell[1:3]) + 25))
+
+                spreadsheet.update_acell(plotCell, imageString)
+
+                print('Should be updated')
+
+                
+
+
+
+
 
 
     #Format sheets differently depending on sheet name
@@ -283,7 +313,7 @@ class GSheet:
                 self.yearDict[year] = dict( sorted(self.yearDict[year].items(), key = lambda item: item[1]) )
 
 
-            yearCell = "{0}{1}".format(startCell[0], int(startCell[1:3]) - 10)
+            self.yearCell = "{0}{1}".format(startCell[0], int(startCell[1:3]) - 30)
 
             count = 0
 
@@ -297,46 +327,130 @@ class GSheet:
                 if year == '2022':
 
                     if count == 0:
-                        #@TODO need to add formatting to merge all cells and to make year bold
 
-                        spreadsheet.update_acell(yearCell, year)
+                        spreadsheet.update_acell(self.yearCell, year)
 
-                        gsformatting.format_cell_ranges(spreadsheet, [(yearCell, self.headerFormat)])
-                        spreadsheet.merge_cells("{0}:{1}{2}".format(yearCell, "G", yearCell[1:3]))
+                        gsformatting.format_cell_ranges(spreadsheet, [(self.yearCell, self.headerFormat)])
+                        print("{0}:{1}{2}".format(self.yearCell, "G", self.yearCell[1:3]))
+                        spreadsheet.merge_cells("{0}:{1}{2}".format(self.yearCell, "G", self.yearCell[1:3]))
 
-                        yearCell = "{0}{1}".format(yearCell[0], int(yearCell[1:3]) + 1)
+                        self.yearCell = "{0}{1}".format(self.yearCell[0], int(self.yearCell[1:3]) + 1)
                         print("should be updated")
 
-                    for key in self.yearDict[year].keys():
+                    labels = list(self.yearDict[year].keys())
+                    data = list(self.yearDict[year].values())
 
-                        spreadsheet.update_acell(yearCell, key)
+                    # if len(labels) > 5:
+                    #     range = "{0}:{1}".format()
 
-                        yearCell = "{0}{1}".format(yearCell[0], int(yearCell[1:3]) + 1)
+                    while labels is not None:
+                        print(labels)
+                        if len(labels) > 5:
+                            labelRange = "{0}:{1}{2}".format(self.yearCell, chr(ord(self.yearCell[0]) + 4), self.yearCell[1:3])
+                            dataRange = "{0}{1}:{2}{3}".format(self.yearCell[0], int(self.yearCell[1:3]) + 1, chr(ord(self.yearCell[0]) + 4), int(self.yearCell[1:3]) + 1)
+                            print(labelRange)
+                            print(dataRange)
 
-                        spreadsheet.update_acell(yearCell, self.yearDict[year][key])
+                            currList = labels[0:5]
+                            currData = data[0:5]
 
-                        if yearCell[0] == 'G':
-                            yearCell = "{0}{1}".format(chr(ord(yearCell[0]) - 4), int(yearCell[1:3]) + 1)
+                            labels = labels[5:]
+                            data = data[5:]
                         else:
-                            yearCell = "{0}{1}".format( chr(ord(yearCell[0]) + 1), int(yearCell[1:3]) - 1 )
+                            currList = labels
+                            currData = data
 
-                        count += 1
+                            labels = None
+                            data = None
+
+                        #May only be able to do last 3 months, to stay within quota limits
+
+                        spreadsheet.batch_update( [ { 'range' : labelRange, 'values': [currList] }  ] )
+                        spreadsheet.batch_update( [ { 'range' : dataRange, 'values': [currData] }  ] )
+
+                        labelRange = "{0}{1}:{2}{3}".format(labelRange[0], int(labelRange[1:3]) + 2, chr(ord(labelRange[0]) + 4), int(labelRange[1:3]) + 2)
+                        dataRange = "{0}{1}:{2}{3}".format(dataRange[0], int(dataRange[1:3]) + 2, chr(ord(dataRange[0]) + 4), int(dataRange[1:3]) + 2)
+
+                        #MIGHT NEED TO ADD yearcell value update to reference later?
+
+                        print(labelRange)
+                        print(dataRange)
+                        #print(labels)
+                        print(currList)
+                        print(currData)
+
+
+            #         #Need to change this to batch update for less requests
+            #         for key in self.yearDict[year].keys():
+
+            #             spreadsheet.update_acell(self.yearCell, key)
+
+            #             self.yearCell = "{0}{1}".format(self.yearCell[0], int(self.yearCell[1:3]) + 1)
+
+            #             spreadsheet.update_acell(self.yearCell, self.yearDict[year][key])
+
+            #             if self.yearCell[0] == 'G':
+            #                 self.yearCell = "{0}{1}".format(chr(ord(self.yearCell[0]) - 4), int(self.yearCell[1:3]) + 1)
+            #             else:
+            #                 self.yearCell = "{0}{1}".format( chr(ord(self.yearCell[0]) + 1), int(self.yearCell[1:3]) - 1 )
+
+            #             count += 1
+
+            # self.monthCell = "{0}{1}".format(startCell[0], int(startCell[1:3]) - 34)
+
+            # print(self.monthCell)
+
+            # print(self.monthDict)
+
+            # count = 0
+
+            # for month in self.monthDict:
+
+            #     if count == 0:
+
+            #         spreadsheet.update_acell(self.monthCell, month)
+
+            #         gsformatting.format_cell_ranges(spreadsheet, [(self.monthCell, self.headerFormat)])
+            #         spreadsheet.merge_cells("{0}:{1}{2}".format(self.monthCell, "G", self.monthCell[1:3]))
+
+            #         self.monthCell = "{0}{1}".format(self.monthCell[0], int(self.monthCell[1:3]) + 1)
+            #         print("should be updated")
+
+            #     for key in self.monthDict[month].keys():
+
+            #         if count == 0:
+
+            #             spreadsheet.update_acell(self.monthCell, key)
+
+            #             self.monthCell = "{0}{1}".format(self.monthCell[0], int(self.monthCell[1:3]) + 1)
+
+            #             spreadsheet.update_acell(self.monthCell, self.monthDict[month][key])
+
+            #             if self.monthCell[0] == 'G':
+            #                 self.monthCell = "{0}{1}".format(chr(ord(self.monthCell[0]) - 4), int(self.monthCell[1:3]) + 1)
+            #             else:
+            #                 self.monthCell = "{0}{1}".format( chr(ord(self.monthCell[0]) + 1), int(self.monthCell[1:3]) - 1 )
+
+            #     count += 1
+
+            
+            
             
 
                         
                         # if count == 0:
-                        #     spreadsheet.update_acell(yearCell, key)
+                        #     spreadsheet.update_acell(self.yearCell, key)
                         # else:
-                        #     yearCell = "{0}{1}".format( chr(ord(yearCell[0]) + 1), int(yearCell[1:3]))
-                        #     spreadsheet.update_acell(yearCell, key)
+                        #     self.yearCell = "{0}{1}".format( chr(ord(self.yearCell[0]) + 1), int(self.yearCell[1:3]))
+                        #     spreadsheet.update_acell(self.yearCell, key)
 
-                        # yearCell = "{0}{1}".format(yearCell[0], int(yearCell[1:3]) + 1)
-                        # spreadsheet.update_acell(yearCell, self.yearDict[year][key])
+                        # self.yearCell = "{0}{1}".format(self.yearCell[0], int(self.yearCell[1:3]) + 1)
+                        # spreadsheet.update_acell(self.yearCell, self.yearDict[year][key])
                         
 
-                    #     spreadsheet.update_acell(yearCell, year[key])
+                    #     spreadsheet.update_acell(self.yearCell, year[key])
 
-                    #     yearCell = "{0}{1}".format(yearCell[0], int(yearCell[1:3]) + 1)
+                    #     self.yearCell = "{0}{1}".format(self.yearCell[0], int(self.yearCell[1:3]) + 1)
 
 
 
@@ -390,7 +504,10 @@ class GSheet:
         if sheetName in self.currentSheetNames.keys():
             existFlag = True
         else:
-            existFlag = self.createSheet(sheetName, 500, 30)
+            if "Expenses" in sheetName:
+                existFlag = self.createSheet(sheetName, 1000, 30)
+            else:
+                existFlag = self.createSheet(sheetName, 500, 30)
 
         # for sheet in self.currentSheets:
         #     print(sheetName)

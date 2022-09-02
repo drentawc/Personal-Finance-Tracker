@@ -52,7 +52,7 @@ def main():
     #Test upload
     # testDict = {"Total" : 1234.23333, "Groceries" : 555.05, "Electronics": 1.0000000000000000000000000000000000000006}
     # asd = Plot(testDict, config['Imgur'], "2022")
-    # asd.createExpenseChart()
+    # asd.createExpenseChart("Yearly Expenses")
     # print(asd.uploadToImgur())
 
 
