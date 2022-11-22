@@ -8,6 +8,5 @@
 
 Need to have a service account to run it, may have to remake these every once in a while.
 
-Want to store the mint credentials in a local file or can run it as system variables or something check gitlab
+Config file contains all of the needed credentials, including Mint email and password, Google sheet name, key and service json, and imgur api credentials.
 
-# Add json to exclude file and add client secret and 
