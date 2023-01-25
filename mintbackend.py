@@ -227,53 +227,85 @@ class MintBackend:
         )
 
 
+    #Establish connection to local MySQL database and insert current user, accounts, and transactions
     def importToSql(self):
 
-        connection = pymysql.connect(host=self.config['Database']['host'], user=self.config['Database']['user'], password=self.config['Database']['password'], db=self.config['Database']['db'])
+        self.connection = pymysql.connect(host=self.config['Database']['host'], user=self.config['Database']['user'], password=self.config['Database']['password'], db=self.config['Database']['db'])
+
+        self.insertUsers()
+
+        self.insertAccounts()
+
+        #self.insertTransactions()
+
+
 
         #connection = pymysql.connect(host="localhost", user="root", password="Elheat1337@$", db="finances")
 
-        with connection:
 
-            with connection.cursor() as cursor:
+
+    #Insert current user from config into database if it doesnt exist and return userId from database
+    def insertUsers(self):
+
+        with self.connection:
+
+            with self.connection.cursor() as cursor:
 
                 #I think I want REPLACE INTO for all of these commands, so that it replaces if entry is there if not it inserts
                 
                 #NEED insert into with usersCommand, since auto increment is on now don't need to pass userId in, may want to add email into database
-                usersCommand = 'INSERT INTO `users` (`firstName`, `lastName`, `password`) VALUES (%s, %s, %s)'
+                usersCommand = 'INSERT IGNORE INTO `users` (`firstName`, `lastName`, `password`) VALUES (%s, %s, %s)'
                 
                 cursor.execute(usersCommand, (self.config['Database']['firstName'], self.config['Database']['lastName'], self.config['Mint']['pass'] ))
 
-                connection.commit()
+                self.connection.commit()
 
-
-
-            with connection.cursor() as cursor:
+            with self.connection.cursor() as cursor:
 
                 userIdCommand = 'SELECT `userId` FROM `users` WHERE `firstName`=%s AND `lastName`=%s'
 
                 cursor.execute(userIdCommand, (self.config['Database']['firstName'], self.config['Database']['lastName']) )
 
-                userId = cursor.fetchone()
+                self.userId = cursor.fetchone()
 
-                print(userId)
+    def insertAccounts(self):
+
+        with self.connection:
+
+            with self.connection.cursor() as cursor:
 
                 #@TODO Accounts are currently list, maybe more beneficial to just have them all in the same dataframe
-                # for account in self.accounts:
-                #     currentAccount = list(account.itertuples(index=False, name=None))
-                #     print(currentAccount)
-                # transactionList = list(self.transactions.itertuples(index=False, name=None))
-                # investmentList = list()
 
+                #@TODO need to add userId to current Account list
+                for account in self.accounts:
 
+                    account.insert(0, "userId", [self.userId[0]] * account[account.columns[0]].count())
 
-                #accountsCommand = 'INSERT INTO `accounts` (`userId`, `bankName`, `description`, `balance`, `accountType`, `accountId`) VALUES (%s, %s, %s, %s, %s, %s)'
+                    currentAccount = list(account.itertuples(index=False, name=None))
+                    print(currentAccount)
+                
+                    # accountsCommand = 'INSERT IGNORE INTO `accounts` (`userId`, `bankName`, `description`, `balance`, `accountType`) VALUES (%s, %s, %s, %s, %s)'
+                    # cursor.executemany(accountsCommand, currentAccount)
 
-                #transactionCommand = 'INSERT INTO `transactions` (`transactionId`, `userId`, `accountId`, `date`, `amount`, `category`, `description`) VALUES (%s, %s, %s, %s, %s, %s)'
+                    # self.connection.commit()
 
+    def insertTransactions(self):
 
-                # cursor.executemany(accountsCommand, accountsCommand)
-                # cursor.executemany()
+        with self.connection:
+
+            with self.connection.cursor() as cursor:
+
+                self.transactions.insert()
+
+                tempTuple = self.transactions.itertuples(index=False, name=None)
+
+                transactionList = list(self.transactions.itertuples(index=False, name=None))
+
+                transactionCommand = 'INSERT IGNORE INTO `transactions` (`date`, `amount`, `category`, `description`, `userId`, `accountId`) VALUES (%s, %s, %s, %s, %s, %s)'
+
+                cursor.executemany(transactionCommand, transactionList)
+
+                self.connection.commit()
 
 
 
