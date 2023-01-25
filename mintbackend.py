@@ -8,6 +8,8 @@
 
 import mintapi as mintapi
 import pandas as pd
+import secrets
+import pymysql
 
 
 #Possible methods:
@@ -23,9 +25,13 @@ class MintBackend:
 
         self.accounts = pd.DataFrame()
 
+        self.setUser()
+
         self.setTransactions()
 
         self.setAccounts()
+
+        self.importToSql()
 
 
     #Helper method to organize all transactions into months
@@ -35,6 +41,11 @@ class MintBackend:
     #Helper to get month of transaction data
     def getTransactionMonth(self, date):
         ""
+
+    #Set current user to be sent to MySQL database
+    def setUser(self):
+        self.firstName = self.config['Database']['firstName']
+        self.lastName = self.config['Database']['lastName']
 
 
     #Set various transaction class variables
@@ -214,6 +225,56 @@ class MintBackend:
             wait_for_sync_timeout=300,
             use_chromedriver_on_path=False
         )
+
+
+    def importToSql(self):
+
+        connection = pymysql.connect(host=self.config['Database']['host'], user=self.config['Database']['user'], password=self.config['Database']['password'], db=self.config['Database']['db'])
+
+        #connection = pymysql.connect(host="localhost", user="root", password="Elheat1337@$", db="finances")
+
+        with connection:
+
+            with connection.cursor() as cursor:
+
+                #I think I want REPLACE INTO for all of these commands, so that it replaces if entry is there if not it inserts
+                
+                #NEED insert into with usersCommand, since auto increment is on now don't need to pass userId in, may want to add email into database
+                usersCommand = 'INSERT INTO `users` (`firstName`, `lastName`, `password`) VALUES (%s, %s, %s)'
+                
+                cursor.execute(usersCommand, (self.config['Database']['firstName'], self.config['Database']['lastName'], self.config['Mint']['pass'] ))
+
+                connection.commit()
+
+
+
+            with connection.cursor() as cursor:
+
+                userIdCommand = 'SELECT `userId` FROM `users` WHERE `firstName`=%s AND `lastName`=%s'
+
+                cursor.execute(userIdCommand, (self.config['Database']['firstName'], self.config['Database']['lastName']) )
+
+                userId = cursor.fetchone()
+
+                print(userId)
+
+                #@TODO Accounts are currently list, maybe more beneficial to just have them all in the same dataframe
+                # for account in self.accounts:
+                #     currentAccount = list(account.itertuples(index=False, name=None))
+                #     print(currentAccount)
+                # transactionList = list(self.transactions.itertuples(index=False, name=None))
+                # investmentList = list()
+
+
+
+                #accountsCommand = 'INSERT INTO `accounts` (`userId`, `bankName`, `description`, `balance`, `accountType`, `accountId`) VALUES (%s, %s, %s, %s, %s, %s)'
+
+                #transactionCommand = 'INSERT INTO `transactions` (`transactionId`, `userId`, `accountId`, `date`, `amount`, `category`, `description`) VALUES (%s, %s, %s, %s, %s, %s)'
+
+
+                # cursor.executemany(accountsCommand, accountsCommand)
+                # cursor.executemany()
+
 
 
     #Change email and password to be command line arguments you pass or maybe even environment variables

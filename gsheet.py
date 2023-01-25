@@ -19,7 +19,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 #Unused right now
-from df2gspread import df2gspread as d2g
+#from df2gspread import df2gspread as d2g
 from google.oauth2.service_account import Credentials
 
 from plot import Plot

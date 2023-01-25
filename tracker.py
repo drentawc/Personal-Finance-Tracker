@@ -31,9 +31,9 @@ import configparser
 
 #Local imports
 from mintbackend import MintBackend
-from gsheet import GSheet
+# from gsheet import GSheet
 
-from plot import Plot
+# from plot import Plot
 
 
 def main():
@@ -44,9 +44,9 @@ def main():
     config.read(args.config)
 
     # #mint = ""
-    # mint = MintBackend(config)
+    mint = MintBackend(config)
 
-    GSheet(MintBackend(config), config)
+   # GSheet(MintBackend(config), config)
 
 
     #Test upload
