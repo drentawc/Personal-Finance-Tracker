@@ -55,7 +55,7 @@ class MintBackend:
         #print(transactions.keys()) #To see various categories with each transaction
 
         #Drop all unneeded columns
-        transactions.drop(columns=['isReviewed', 'etag', 'matchState', 'transactionReviewState', 'merchantId', 'isLinkedToRule'], inplace=True)
+        transactions.drop(columns=['isReviewed', 'etag', 'matchState', 'transactionReviewState', 'merchantId', 'isLinkedToRule'] , inplace=True)
 
         #Index(['type', 'id', 'accountId', 'accountRef', 'date', 'description',
     #    'category', 'amount', 'status', 'matchState', 'fiData', 'isReviewed',
@@ -71,38 +71,50 @@ class MintBackend:
 
 
         #Set up empty dataframes
-        self.savingsTransactions = pd.DataFrame(columns=['Date', 'Account', 'Amount', 'Category', 'Description']) #, 'Status'])#, 'Type'])
-        self.checkingTransactions = pd.DataFrame(columns=['Date', 'Account', 'Amount', 'Category', 'Description']) #, 'Status'])#, 'Type'])
-        self.creditTransactions = pd.DataFrame(columns=['Date', 'Account', 'Amount', 'Category', 'Description']) #, 'Status'])#, 'Type'])
+        self.savingsTransactions = pd.DataFrame(columns=['Date', 'Account', 'Amount', 'Category', 'Description', 'AccountNum']) #, 'Status'])#, 'Type'])
+        self.checkingTransactions = pd.DataFrame(columns=['Date', 'Account', 'Amount', 'Category', 'Description', 'AccountNum']) #, 'Status'])#, 'Type'])
+        self.creditTransactions = pd.DataFrame(columns=['Date', 'Account', 'Amount', 'Category', 'Description', 'AccountNum']) #, 'Status'])#, 'Type'])
 
         #self.transactions = self.transactions.reset_index()
 
         #Loop through all transactions in DataFrame
         for index, row in self.transactions.iterrows():
 
+            if index < 10:
+
+                print(row)
+                
+                print(row['accountRef'])
+
+                print(row['fiData'])
+
+                print(row['category'])
+
+                print()
+
             #Seperate all transactions by account ID
 
-            if row["accountId"] == '9578312_8650884':
-                currentAccount = "Main Checking account"
-            elif row["accountId"] == '9578312_8802348':
-                currentAccount = "Wells Fargo Credit Card"
-            elif row['accountId'] == '9578312_8650897':
-                currentAccount = "Discover It Credit Card"
-            elif row['accountId'] == '9578312_8650883':
-                currentAccount = "Second Checking account"
-            else:
-                currentAccount = row["accountRef"]["name"]
+            # if row["accountId"] == '9578312_8650884':
+            #     currentAccount = "Main Checking account"
+            # elif row["accountId"] == '9578312_8802348':
+            #     currentAccount = "Wells Fargo Credit Card"
+            # elif row['accountId'] == '9578312_8650897':
+            #     currentAccount = "Discover It Credit Card"
+            # elif row['accountId'] == '9578312_8650883':
+            #     currentAccount = "Second Checking account"
+            # else:
+            #     currentAccount = row["accountRef"]["name"]
 
 
-            data = { 'Date': [row['date']], 'Account': [currentAccount], 'Amount': [row['amount']], 'Category' : [row['category']['name']], 'Description': [row['description']] } #, 'Status': [row['status']]  } #, 'AccountRef': row['accountRef'] }
+            data = { 'Date': [row['date']], 'Account': [row['category']['name']], 'Amount': [row['amount']], 'Category' : [row['category']['categoryType']], 'Description': [row['description']], 'AccountNum' : [row['accountId']]} #, 'Status': [row['status']]  } #, 'AccountRef': row['accountRef'] }
             #data = { 'Date': [row['date']], 'Account': [currentAccount], 'Amount': [row['amount']], 'Category' : [row['category']], 'Description': [row['description']], 'Status': [row['status']]  } #, 'AccountRef': row['accountRef'] }
             entry = pd.DataFrame( data )
 
             #entry = entry.fillna('')
 
-            if "Checking" in currentAccount:
+            if "Bank" in row['accountRef']['type']:
                 self.checkingTransactions = pd.concat([self.checkingTransactions, entry], axis = 0)
-            elif "Credit" in currentAccount:
+            elif "Credit" in row['accountRef']['type']:
                 self.creditTransactions = pd.concat([self.creditTransactions, entry], axis = 0)
             else:
                 self.savingsTransactions = pd.concat([self.savingsTransactions, entry], axis = 0)
@@ -116,12 +128,16 @@ class MintBackend:
     #Set accounts dictionary with all accounts and balances
     def setAccounts(self):
 
-        self.checkingAccounts = pd.DataFrame(columns=['Company', 'Name', 'Balance', 'Type'])#, 'Type'])
-        self.savingsAccounts = pd.DataFrame(columns=['Company', 'Name', 'Balance', 'Type'])
-        self.creditAccounts = pd.DataFrame(columns=['Company', 'Name', 'Balance', 'Type'])
-        self.investmentAccounts = pd.DataFrame(columns=['Company', 'Name', 'Balance', 'Type'])
+        self.checkingAccounts = pd.DataFrame(columns=['Company', 'AccountNumber', 'Name', 'Balance', 'Type', 'SofiNumber'])#, 'Type'])
+        self.savingsAccounts = pd.DataFrame(columns=['Company', 'AccountNumber', 'Name', 'Balance', 'Type', 'SofiNumber'])
+        self.creditAccounts = pd.DataFrame(columns=['Company', 'AccountNumber', 'Name', 'Balance', 'Type', 'SofiNumber'])
+        self.investmentAccounts = pd.DataFrame(columns=['Company', 'AccountNumber', 'Name', 'Balance', 'Type', 'SofiNumber'])
 
         for account in self.getAccounts():
+
+            #print(account)
+
+            #print(account)
             # if i == 2:
             #print(account.keys())
             #     print(account)
@@ -134,35 +150,35 @@ class MintBackend:
 
             #print(account)
 
-            if account['cpAccountNumberLast4'] == '6031':
-                name = "Old Capital One Savings Account"
-            elif account['cpAccountNumberLast4'] == '1849':
-                name = "Secondary Checking Account"
-            elif account['cpAccountNumberLast4'] == '5159':
-                name = "Main Checking Account"
-            elif account['cpAccountNumberLast4'] == '0894':
-                name = "Rent Savings Account"
+            # if account['cpAccountNumberLast4'] == '6031':
+            #     name = "Old Capital One Savings Account"
+            # elif account['cpAccountNumberLast4'] == '1849':
+            #     name = "Secondary Checking Account"
+            # elif account['cpAccountNumberLast4'] == '5159':
+            #     name = "Main Checking Account"
+            # elif account['cpAccountNumberLast4'] == '0894':
+            #     name = "Rent Savings Account"
 
-            elif account['cpAccountNumberLast4'] == '7004':
-                name = "Discover Credit Card"
-            elif account['cpAccountNumberLast4'] == '9758':
-                name = "Wells Fargo Credit Card"
-            elif account['cpAccountNumberLast4'] == '2306':
-                name = "Capital One Credit Card"
+            # elif account['cpAccountNumberLast4'] == '7004':
+            #     name = "Discover Credit Card"
+            # elif account['cpAccountNumberLast4'] == '9758':
+            #     name = "Wells Fargo Credit Card"
+            # elif account['cpAccountNumberLast4'] == '2306':
+            #     name = "Capital One Credit Card"
 
-            elif account['cpAccountNumberLast4'] == 'enta':
-                name = "401k"
-            elif account['cpAccountNumberLast4'] == '8027':
-                name = "SoFi Roth IRA"
-            else:
-                print(account)
+            # elif account['cpAccountNumberLast4'] == 'enta':
+            #     name = "401k"
+            # elif account['cpAccountNumberLast4'] == '8027':
+            #     name = "SoFi Roth IRA"
+            # else:
+            #     print(account)
 
             #print("{0} - {1}".format(account['cpAccountNumberLast4'], account['bankAccountType']))
 
             if 'availableBalance' in account:
-                data = { 'Company' : [account['fiName']], 'Name' : [name], 'Balance' : [account['availableBalance']], 'Type': [account['bankAccountType']] }
+                data = { 'Company' : [account['fiName']], 'AccountNumber' : [account['cpAccountNumberLast4']], 'Name' : [account['name']], 'Balance' : [account['availableBalance']], 'Type': [account['bankAccountType']], 'SofiNumber':  [account['id']] }
             elif 'value' in account:
-                data = { 'Company' : [account['fiName']], 'Name' : [name], 'Balance' : [account['value']], 'Type': [account['type']] }
+                data = { 'Company' : [account['fiName']], 'AccountNumber' : [account['cpAccountNumberLast4']], 'Name' : [account['name']], 'Balance' : [account['value']], 'Type': [account['type']], 'SofiNumber': [account['id']] }
 
             entry = pd.DataFrame(data)
 
@@ -236,7 +252,7 @@ class MintBackend:
 
         self.insertAccounts()
 
-        #self.insertTransactions()
+        self.insertTransactions()
 
 
 
@@ -247,65 +263,125 @@ class MintBackend:
     #Insert current user from config into database if it doesnt exist and return userId from database
     def insertUsers(self):
 
-        with self.connection:
 
-            with self.connection.cursor() as cursor:
+        with self.connection.cursor() as cursor:
 
-                #I think I want REPLACE INTO for all of these commands, so that it replaces if entry is there if not it inserts
-                
-                #NEED insert into with usersCommand, since auto increment is on now don't need to pass userId in, may want to add email into database
-                usersCommand = 'INSERT IGNORE INTO `users` (`firstName`, `lastName`, `password`) VALUES (%s, %s, %s)'
-                
-                cursor.execute(usersCommand, (self.config['Database']['firstName'], self.config['Database']['lastName'], self.config['Mint']['pass'] ))
+            #I think I want REPLACE INTO for all of these commands, so that it replaces if entry is there if not it inserts
+            
+            #NEED insert into with usersCommand, since auto increment is on now don't need to pass userId in, may want to add email into database
+            usersCommand = 'INSERT IGNORE INTO `users` (`firstName`, `lastName`, `password`) VALUES (%s, %s, %s)'
+            
+            cursor.execute(usersCommand, (self.config['Database']['firstName'], self.config['Database']['lastName'], self.config['Mint']['pass'] ))
 
-                self.connection.commit()
+            self.connection.commit()
 
-            with self.connection.cursor() as cursor:
+        with self.connection.cursor() as cursor:
 
-                userIdCommand = 'SELECT `userId` FROM `users` WHERE `firstName`=%s AND `lastName`=%s'
+            userIdCommand = 'SELECT `userId` FROM `users` WHERE `firstName`=%s AND `lastName`=%s'
 
-                cursor.execute(userIdCommand, (self.config['Database']['firstName'], self.config['Database']['lastName']) )
+            cursor.execute(userIdCommand, (self.config['Database']['firstName'], self.config['Database']['lastName']) )
 
-                self.userId = cursor.fetchone()
+            self.userId = cursor.fetchone()[0]
 
     def insertAccounts(self):
 
-        with self.connection:
+        # for account in self.accounts:
 
-            with self.connection.cursor() as cursor:
+        #     account.insert(0, "userId", [self.userId] * account[account.columns[0]].count())
 
-                #@TODO Accounts are currently list, maybe more beneficial to just have them all in the same dataframe
+        #     currentAccount = list(account.itertuples(index=False, name=None))
+        #     print(currentAccount)
 
-                #@TODO need to add userId to current Account list
-                for account in self.accounts:
+        with self.connection.cursor() as cursor:
 
-                    account.insert(0, "userId", [self.userId[0]] * account[account.columns[0]].count())
+            #@TODO Accounts are currently list, maybe more beneficial to just have them all in the same dataframe
 
-                    currentAccount = list(account.itertuples(index=False, name=None))
-                    print(currentAccount)
-                
-                    # accountsCommand = 'INSERT IGNORE INTO `accounts` (`userId`, `bankName`, `description`, `balance`, `accountType`) VALUES (%s, %s, %s, %s, %s)'
-                    # cursor.executemany(accountsCommand, currentAccount)
+            #@TODO need to add userId to current Account list
+            for account in self.accounts:
 
-                    # self.connection.commit()
+                account.insert(0, "userId", [self.userId] * account[account.columns[0]].count())
+
+                currentAccount = list(account.itertuples(index=False, name=None))
+                print(currentAccount)
+
+                #print(currentAccount['accountRef'])
+            
+        #         accountsCommand = 'INSERT IGNORE INTO `accounts` (`userId`, `bankName`, `lastFour`, `description`, `balance`, `accountType`) VALUES (%s, %s, %s, %s, %s, %s)'
+        #         cursor.executemany(accountsCommand, currentAccount)
+
+        #         self.connection.commit()
+
+        # with self.connection.cursor() as cursor:
+
+        #     accountIdCommand = 'SELECT `accountId`, `bankName`, `description` FROM `accounts` WHERE `userId`=%s'
+
+        #     cursor.execute(accountIdCommand, self.userId )
+
+        #     self.accountIds = cursor.fetchall()
+
+        #print(self.accountIds)
 
     def insertTransactions(self):
 
-        with self.connection:
 
-            with self.connection.cursor() as cursor:
 
-                self.transactions.insert()
+        # with self.connection:
 
-                tempTuple = self.transactions.itertuples(index=False, name=None)
+        #     with self.connection.cursor() as cursor:
 
-                transactionList = list(self.transactions.itertuples(index=False, name=None))
+        # self.checkingTransactions.insert(4, "userId", [self.userId] * self.transactions[self.transactions.columns[0]].count())
+        # self.creditAccounts.insert(4, "userId", [self.userId] * self.transactions[self.transactions.columns[0]].count())
+        # self.investmentAccounts.insert(4, "userId", [self.userId] * self.transactions[self.transactions.columns[0]].count())
 
-                transactionCommand = 'INSERT IGNORE INTO `transactions` (`date`, `amount`, `category`, `description`, `userId`, `accountId`) VALUES (%s, %s, %s, %s, %s, %s)'
+        # for row in self.checkingTransactions:
+        #     if 
 
-                cursor.executemany(transactionCommand, transactionList)
+        # self.checkingTransactions.insert(4, "accountId", [self.userId] * self.transactions[self.transactions.columns[0]].count())
+        # self.creditAccounts.insert(4, "accountId", [self.userId] * self.transactions[self.transactions.columns[0]].count())
+        # self.investmentAccounts.insert(4, "accountId", [self.userId] * self.transactions[self.transactions.columns[0]].count())
 
-                self.connection.commit()
+        #print(self.transactions.head())
+
+        
+        
+        #print(self.checkingTransactions['AccountNum'].values)
+
+        print(self.checkingTransactions)
+
+        # for transaction in self.checkingTransactions:
+
+        #     print(transaction)
+
+            # currentAccount = list(transaction.itertuples(index=False, name=None))
+
+            # print()
+
+            # print(currentAccount)
+
+        
+
+
+        # print(self.checkingTransactions.head())
+
+        # print()
+
+        # print(self.creditTransactions.head())
+
+        # print(self.transactions.head())
+
+        # transactionList = list(self.transactions.itertuples(index=False, name=None))
+
+        # print(transactionList[0])
+
+        # print(transactionList[1])
+
+        # print(transactionList[2])
+
+                # transactionCommand = 'INSERT IGNORE INTO `transactions` (`date`, `amount`, `category`, `description`, `userId`, `accountId`) VALUES (%s, %s, %s, %s, %s, %s)'
+
+                # cursor.executemany(transactionCommand, transactionList)
+
+                # self.connection.commit()
 
 
 
