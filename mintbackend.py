@@ -71,9 +71,11 @@ class MintBackend:
 
 
         #Set up empty dataframes
-        self.savingsTransactions = pd.DataFrame(columns=['Date', 'Account', 'Amount', 'Category', 'Description', 'AccountNum']) #, 'Status'])#, 'Type'])
-        self.checkingTransactions = pd.DataFrame(columns=['Date', 'Account', 'Amount', 'Category', 'Description', 'AccountNum']) #, 'Status'])#, 'Type'])
-        self.creditTransactions = pd.DataFrame(columns=['Date', 'Account', 'Amount', 'Category', 'Description', 'AccountNum']) #, 'Status'])#, 'Type'])
+        self.savingsTransactions = pd.DataFrame(columns=['Date', 'Amount', 'Category', 'Description', 'AccountNum', 'TransactionId']) #, 'Status'])#, 'Type'])
+        self.checkingTransactions = pd.DataFrame(columns=['Date', 'Amount', 'Category', 'Description', 'AccountNum', 'TransactionId']) #, 'Status'])#, 'Type'])
+        self.creditTransactions = pd.DataFrame(columns=['Date', 'Amount', 'Category', 'Description', 'AccountNum', 'TransactionId']) #, 'Status'])#, 'Type'])
+
+        self.allTransactions = pd.DataFrame(columns=['Date', 'Amount', 'Category', 'Description', 'AccountNum', 'TransactionId'])
 
         #self.transactions = self.transactions.reset_index()
 
@@ -106,7 +108,7 @@ class MintBackend:
             #     currentAccount = row["accountRef"]["name"]
 
 
-            data = { 'Date': [row['date']], 'Account': [row['category']['name']], 'Amount': [row['amount']], 'Category' : [row['category']['categoryType']], 'Description': [row['description']], 'AccountNum' : [row['accountId']]} #, 'Status': [row['status']]  } #, 'AccountRef': row['accountRef'] }
+            data = { 'Date': [row['date']], 'Amount': [row['amount']], 'Category' : [row['category']['name']], 'Description': [row['description']], 'AccountNum' : [row['accountId']], 'TransactionId' : [row['id']]} #, 'Status': [row['status']]  } #, 'AccountRef': row['accountRef'] }
             #data = { 'Date': [row['date']], 'Account': [currentAccount], 'Amount': [row['amount']], 'Category' : [row['category']], 'Description': [row['description']], 'Status': [row['status']]  } #, 'AccountRef': row['accountRef'] }
             entry = pd.DataFrame( data )
 
@@ -114,24 +116,28 @@ class MintBackend:
 
             if "Bank" in row['accountRef']['type']:
                 self.checkingTransactions = pd.concat([self.checkingTransactions, entry], axis = 0)
+                self.allTransactions = pd.concat([self.checkingTransactions, entry], axis = 0)
             elif "Credit" in row['accountRef']['type']:
                 self.creditTransactions = pd.concat([self.creditTransactions, entry], axis = 0)
+                self.allTransactions = pd.concat([self.checkingTransactions, entry], axis = 0)
             else:
                 self.savingsTransactions = pd.concat([self.savingsTransactions, entry], axis = 0)
+                self.allTransactions = pd.concat([self.checkingTransactions, entry], axis = 0)
 
         self.checkingTransactions = self.checkingTransactions.sort_values(by='Date', ascending=False)
         self.creditTransactions = self.creditTransactions.sort_values(by='Date', ascending=False)
         self.savingsTransactions = self.savingsTransactions.sort_values(by='Date', ascending=False)
+        self.allTransactions = self.allTransactions.sort_values(by='Date')
 
 
 
     #Set accounts dictionary with all accounts and balances
     def setAccounts(self):
 
-        self.checkingAccounts = pd.DataFrame(columns=['Company', 'AccountNumber', 'Name', 'Balance', 'Type', 'SofiNumber'])#, 'Type'])
-        self.savingsAccounts = pd.DataFrame(columns=['Company', 'AccountNumber', 'Name', 'Balance', 'Type', 'SofiNumber'])
-        self.creditAccounts = pd.DataFrame(columns=['Company', 'AccountNumber', 'Name', 'Balance', 'Type', 'SofiNumber'])
-        self.investmentAccounts = pd.DataFrame(columns=['Company', 'AccountNumber', 'Name', 'Balance', 'Type', 'SofiNumber'])
+        self.checkingAccounts = pd.DataFrame(columns=['Company', 'LastFour', 'Name', 'Balance', 'Type', 'AccountNumber'])#, 'Type'])
+        self.savingsAccounts = pd.DataFrame(columns=['Company', 'LastFour', 'Name', 'Balance', 'Type', 'AccountNumber'])
+        self.creditAccounts = pd.DataFrame(columns=['Company', 'LastFour', 'Name', 'Balance', 'Type', 'AccountNumber'])
+        self.investmentAccounts = pd.DataFrame(columns=['Company', 'LastFour', 'Name', 'Balance', 'Type', 'AccountNumber'])
 
         for account in self.getAccounts():
 
@@ -176,9 +182,9 @@ class MintBackend:
             #print("{0} - {1}".format(account['cpAccountNumberLast4'], account['bankAccountType']))
 
             if 'availableBalance' in account:
-                data = { 'Company' : [account['fiName']], 'AccountNumber' : [account['cpAccountNumberLast4']], 'Name' : [account['name']], 'Balance' : [account['availableBalance']], 'Type': [account['bankAccountType']], 'SofiNumber':  [account['id']] }
+                data = { 'Company' : [account['fiName']], 'LastFour' : [account['cpAccountNumberLast4']], 'Name' : [account['name']], 'Balance' : [account['availableBalance']], 'Type': [account['bankAccountType']], 'AccountNumber':  [account['id']] }
             elif 'value' in account:
-                data = { 'Company' : [account['fiName']], 'AccountNumber' : [account['cpAccountNumberLast4']], 'Name' : [account['name']], 'Balance' : [account['value']], 'Type': [account['type']], 'SofiNumber': [account['id']] }
+                data = { 'Company' : [account['fiName']], 'LastFour' : [account['cpAccountNumberLast4']], 'Name' : [account['name']], 'Balance' : [account['value']], 'Type': [account['type']], 'AccountNumber': [account['id']] }
 
             entry = pd.DataFrame(data)
 
@@ -301,87 +307,55 @@ class MintBackend:
 
                 account.insert(0, "userId", [self.userId] * account[account.columns[0]].count())
 
+                #print(self.userId)
+
                 currentAccount = list(account.itertuples(index=False, name=None))
-                print(currentAccount)
+                #print(currentAccount)
 
                 #print(currentAccount['accountRef'])
             
-        #         accountsCommand = 'INSERT IGNORE INTO `accounts` (`userId`, `bankName`, `lastFour`, `description`, `balance`, `accountType`) VALUES (%s, %s, %s, %s, %s, %s)'
-        #         cursor.executemany(accountsCommand, currentAccount)
+                accountsCommand = 'INSERT IGNORE INTO `accounts` (`userId`, `bankName`, `lastFour`, `description`, `balance`, `accountType`, `accountNumber`) VALUES (%s, %s, %s, %s, %s, %s, %s)'
+                cursor.executemany(accountsCommand, currentAccount)
 
-        #         self.connection.commit()
+                self.connection.commit()
 
-        # with self.connection.cursor() as cursor:
+        with self.connection.cursor() as cursor:
 
-        #     accountIdCommand = 'SELECT `accountId`, `bankName`, `description` FROM `accounts` WHERE `userId`=%s'
+            accountIdCommand = 'SELECT `accountId`, `accountNumber` FROM `accounts` WHERE `userId`=%s'
 
-        #     cursor.execute(accountIdCommand, self.userId )
+            cursor.execute(accountIdCommand, self.userId )
 
-        #     self.accountIds = cursor.fetchall()
+            self.accountIds = cursor.fetchall()
 
         #print(self.accountIds)
 
     def insertTransactions(self):
 
+        accountDict = dict((number, id) for id, number in self.accountIds)
 
+        with self.connection.cursor() as cursor:
 
-        # with self.connection:
+            self.allTransactions.insert(0, "userId", [self.userId] * self.allTransactions[self.allTransactions.columns[0]].count())
 
-        #     with self.connection.cursor() as cursor:
+            transactionCommand = 'INSERT IGNORE INTO `transactions` (`userId`, `accountId`, `date`, `amount`, `category`, `description`, `transactionNumber`) VALUES (%s, %s, %s, %s, %s, %s, %s)'
 
-        # self.checkingTransactions.insert(4, "userId", [self.userId] * self.transactions[self.transactions.columns[0]].count())
-        # self.creditAccounts.insert(4, "userId", [self.userId] * self.transactions[self.transactions.columns[0]].count())
-        # self.investmentAccounts.insert(4, "userId", [self.userId] * self.transactions[self.transactions.columns[0]].count())
+            insertList = []
 
-        # for row in self.checkingTransactions:
-        #     if 
+            print(accountDict)
 
-        # self.checkingTransactions.insert(4, "accountId", [self.userId] * self.transactions[self.transactions.columns[0]].count())
-        # self.creditAccounts.insert(4, "accountId", [self.userId] * self.transactions[self.transactions.columns[0]].count())
-        # self.investmentAccounts.insert(4, "accountId", [self.userId] * self.transactions[self.transactions.columns[0]].count())
+            for index, row in self.allTransactions.iterrows():
 
-        #print(self.transactions.head())
+                insertList.append(accountDict[row['AccountNum']])
 
-        
-        
-        #print(self.checkingTransactions['AccountNum'].values)
+            self.allTransactions.insert(1, "accountId", insertList)
 
-        print(self.checkingTransactions)
+            self.allTransactions.drop(columns=['AccountNum'], inplace=True)   
 
-        # for transaction in self.checkingTransactions:
+            transactions = list(self.allTransactions.itertuples(index=False, name=None))
 
-        #     print(transaction)
+            cursor.executemany(transactionCommand, transactions)
 
-            # currentAccount = list(transaction.itertuples(index=False, name=None))
-
-            # print()
-
-            # print(currentAccount)
-
-        
-
-
-        # print(self.checkingTransactions.head())
-
-        # print()
-
-        # print(self.creditTransactions.head())
-
-        # print(self.transactions.head())
-
-        # transactionList = list(self.transactions.itertuples(index=False, name=None))
-
-        # print(transactionList[0])
-
-        # print(transactionList[1])
-
-        # print(transactionList[2])
-
-                # transactionCommand = 'INSERT IGNORE INTO `transactions` (`date`, `amount`, `category`, `description`, `userId`, `accountId`) VALUES (%s, %s, %s, %s, %s, %s)'
-
-                # cursor.executemany(transactionCommand, transactionList)
-
-                # self.connection.commit()
+            self.connection.commit()
 
 
 
