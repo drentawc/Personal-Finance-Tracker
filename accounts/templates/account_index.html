@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block page_content %}
+
+<h1>Accounts</h1>
+<div class="row">
+{% for account in accounts %}
+    <div class="col-md-4">
+
+        <div class="card" style="width: 18rem;">
+
+        
+            <div class="card-header">
+                Accounts
+            </div>
+
+            <div class="card-body">
+                <h5 class="card-title">{{ account.bankName }}</h5>
+                <p class="card-text">{{ account.lastfour }}</p>
+                <a href="{% url 'account_detail' account.pk %}"
+                   class="btn btn-primary">
+                    Read More
+                </a>
+            </div>
+            
+                <!-- <ul class="list-group">
+                    <li class="list-group-item">{{ account.bankName }}-{{ account.lastfour}} </li>
+                </ul> -->
+
+        
+        </div>
+
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
