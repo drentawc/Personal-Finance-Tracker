@@ -3,33 +3,48 @@
 
 <h1>Accounts</h1>
 <div class="row">
-{% for account in accounts %}
     <div class="col-md-4">
 
-        <div class="card" style="width: 18rem;">
+        <h1> asd</h1>
 
-        
-            <div class="card-header">
-                Accounts
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+            <h5 class="card-title">Credit Card Accounts</h5>
             </div>
+            <ul class="list-group list-group-flush">
+
+
+            {% for account in credit %}
+
+                <li class="list-group-item">{{ account.bankname}}-{{ account.lastfour}}</li>
+            {% endfor %}
+
+            </ul>
+            <div class="card-body">
+                <a href="#" class="card-link">Card link</a>
+                <a href="#" class="card-link">Another link</a>
+                </div>
+        </div>
+
+        <!-- {% for account in checking %}
+
+
+            <h1> {{ acc.bankname }} </h1>
+     
 
             <div class="card-body">
-                <h5 class="card-title">{{ account.bankName }}</h5>
-                <p class="card-text">{{ account.lastfour }}</p>
-                <a href="{% url 'account_detail' account.pk %}"
-                   class="btn btn-primary">
+                <h5 class="card-title">{{ acc.bankname }}</h5>
+                <p class="card-text">{{ acc.lastfour }}</p>
+            
+                class="btn btn-primary">
                     Read More
                 </a>
             </div>
-            
-                <!-- <ul class="list-group">
-                    <li class="list-group-item">{{ account.bankName }}-{{ account.lastfour}} </li>
-                </ul> -->
-
         
         </div>
 
+            {% endfor %} -->
+
     </div>
-    {% endfor %}
 </div>
 {% endblock %}

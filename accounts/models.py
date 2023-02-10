@@ -23,6 +23,25 @@ class Account(models.Model):
     accounttype = models.CharField(db_column='accountType', max_length=20, blank=True, null=True)  # Field name made lowercase.
     accountnumber = models.CharField(db_column='accountNumber', max_length=30)  # Field name made lowercase.
 
+    def toString(self):
+        return self.bankname
+
+    # def get_url(self):
+    #     curr = Account.objects.first()
+    #     return curr.accounttype
+        #return Account.objects.filter(accounttype__icontains='credit').all()
+        # prefetch = Prefetch('account_set', queryset=Account.objects.filter(accounttype_contains='CREDIT'), to_attr="credit_accounts")
+        # return Account.objects.filter
+
+    # def getCheckingAccounts(self):
+    #     return Account.objects.filter(accounttype_contains='CHECKING').all()
+
+    # def getSavingAccounts(self):
+    #     return Account.objects.filter(accounttype_contains='SAVING').all()
+
+    # def getSavingAccounts(self):
+    #     return Account.objects.filter(accounttype_contains='Investment').all()
+
     class Meta:
         managed = False
         db_table = 'accounts'
