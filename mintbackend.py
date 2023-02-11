@@ -119,10 +119,10 @@ class MintBackend:
                 self.allTransactions = pd.concat([self.checkingTransactions, entry], axis = 0)
             elif "Credit" in row['accountRef']['type']:
                 self.creditTransactions = pd.concat([self.creditTransactions, entry], axis = 0)
-                self.allTransactions = pd.concat([self.checkingTransactions, entry], axis = 0)
+                self.allTransactions = pd.concat([self.creditTransactions, entry], axis = 0)
             else:
                 self.savingsTransactions = pd.concat([self.savingsTransactions, entry], axis = 0)
-                self.allTransactions = pd.concat([self.checkingTransactions, entry], axis = 0)
+                self.allTransactions = pd.concat([self.savingsTransactions, entry], axis = 0)
 
         self.checkingTransactions = self.checkingTransactions.sort_values(by='Date', ascending=False)
         self.creditTransactions = self.creditTransactions.sort_values(by='Date', ascending=False)

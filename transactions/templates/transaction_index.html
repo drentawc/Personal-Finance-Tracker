@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block page_content %}
+
+<h1>Transactions</h1>
+<div class="row">
+
+    {% for transaction in credit %}
+    <h1>{{transaction.accountid}}</h1>
+    {% endfor %}
+
+
+
+
+</div>
+
+
+{% endblock %}

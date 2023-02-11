@@ -5,9 +5,26 @@
 <div class="row">
     <div class="col-md-4">
 
-        <h1> asd</h1>
+        <div class="card" style="width: 30rem;">
+            <div class="card-body">
+            <h5 class="card-title">Checking Accounts</h5>
+            </div>
+            <ul class="list-group list-group-flush">
 
-        <div class="card" style="width: 18rem;">
+
+            {% for account in checking %}
+                <li class="list-group-item">{{ account.bankname}}   |   {{ account.lastfour}}   |   {{ account.balance}}</li>
+            {% endfor %}
+
+            </ul>
+            <div class="card-body">
+                <a href="#" class="card-link">Card link</a>
+            </div>
+        </div>
+
+        <br />
+
+        <div class="card" style="width: 30rem;">
             <div class="card-body">
             <h5 class="card-title">Credit Card Accounts</h5>
             </div>
@@ -15,15 +32,51 @@
 
 
             {% for account in credit %}
-
-                <li class="list-group-item">{{ account.bankname}}-{{ account.lastfour}}</li>
+                <li class="list-group-item">{{ account.bankname}}   |   {{ account.lastfour}}   |   {{ account.balance}} | <a href="#" class="card-link">Transactions</a></li>
             {% endfor %}
 
             </ul>
             <div class="card-body">
                 <a href="#" class="card-link">Card link</a>
-                <a href="#" class="card-link">Another link</a>
-                </div>
+            </div>
+        </div>
+
+        <br />
+
+        <div class="card" style="width: 30rem;">
+            <div class="card-body">
+            <h5 class="card-title">Savings Accounts</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+
+
+            {% for account in saving %}
+                <li class="list-group-item">{{ account.bankname}}   |   {{ account.lastfour}}   |   {{ account.balance}}</li>
+            {% endfor %}
+
+            </ul>
+            <div class="card-body">
+                <a href="#" class="card-link">Card link</a>
+            </div>
+        </div>
+
+        <br />
+
+        <div class="card" style="width: 30rem;">
+            <div class="card-body">
+            <h5 class="card-title">Investment Accounts</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+
+
+            {% for account in invest %}
+                <li class="list-group-item">{{ account.bankname}}   |   {{ account.lastfour}}   |   {{ account.balance}}</li>
+            {% endfor %}
+
+            </ul>
+            <div class="card-body">
+                <a href="#" class="card-link">Card link</a>
+            </div>
         </div>
 
         <!-- {% for account in checking %}
