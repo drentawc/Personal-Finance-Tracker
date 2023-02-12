@@ -20,8 +20,18 @@ def transaction_index(request):
     #Currently working on a way to return a list of certain accounts, can maybe 
 
     creditTransactions = []
+    # for trans in transactions:
+    #     for account in creditAccounts:
+    #         if trans.
+    #         creditTransactions.append(account)
+
+    creditTransactions = None
+
     for account in creditAccounts:
-        creditTransactions.append(account)
+        if creditTransactions is None:
+            creditTransactions = Transaction.objects.filter(accountid=account.accountid).all()
+        else:
+            creditTransactions = creditTransactions | Transaction.objects.filter(accountid=account.accountid).all()
 
     checkingTransactions = []
     for account in checkingAccounts:
@@ -38,7 +48,7 @@ def transaction_index(request):
 
     #creditAccounts = Account.get
 
-    context = {'transactions' : transactions, 'credit' : creditTransactions, 'checking' : checkingTransactions, 'saving' : savingTransactions, 'invest' : investmentTransactions}
+    context = {'transactions' : transactions, 'credit' : creditTransactions.order_by('-date')[0:50], 'checking' : checkingTransactions, 'saving' : savingTransactions, 'invest' : investmentTransactions}
 
     return render(request, 'transaction_index.html', context)
 

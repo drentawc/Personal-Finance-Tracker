@@ -313,8 +313,10 @@ class MintBackend:
                 #print(currentAccount)
 
                 #print(currentAccount['accountRef'])
+#                 sql = "INSERT INTO updates (ID, insert_datetime, egroup, job_state) VALUES (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE insert_datetime = VALUES(insert_datetime), egroup = VALUES(egroup), job_state = VALUES(job_state);"
+# mycursor.executemany(sql, jobUpdatesList)
             
-                accountsCommand = 'INSERT IGNORE INTO `accounts` (`userId`, `bankName`, `lastFour`, `description`, `balance`, `accountType`, `accountNumber`) VALUES (%s, %s, %s, %s, %s, %s, %s)'
+                accountsCommand = 'INSERT INTO `accounts` (`userId`, `bankName`, `lastFour`, `description`, `balance`, `accountType`, `accountNumber`) VALUES (%s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE balance = VALUES(balance);'
                 cursor.executemany(accountsCommand, currentAccount)
 
                 self.connection.commit()

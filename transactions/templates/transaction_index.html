@@ -4,9 +4,101 @@
 <h1>Transactions</h1>
 <div class="row">
 
-    {% for transaction in credit %}
-    <h1>{{transaction.accountid}}</h1>
-    {% endfor %}
+    <table class="table table-bordered table-sm table-dark ">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Account</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Category</th>
+                <th scope="col">Description</th>
+            </tr>
+        </thead>
+            <tbody>
+                <tr class="clickable" data-toggle="collapse" data-target="#group-of-rows-1" aria-expanded="false" aria-controls="group-of-rows-1">
+                    <td><i class="fa fa-folder">Credit Card Transactions</i></td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                </tr>
+            </tbody>
+                    <tbody id="group-of-rows-1" class="collapse">
+                        {% for transaction in credit %}
+                        <tr>
+                            <th scope="row">{{transaction.date}}</th>
+                            <td>{{transaction.accountid}}</td>
+                            <td>{{transaction.amount}}</td>
+                            <td>{{transaction.category}}</td>
+                            <td>{{transaction.description}}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="table-warning">
+                            <td><i class="fa fa-folder-open"></i> child row</td>
+                            <td>data 1</td>
+                            <td>data 1</td>
+                            <td>data 1</td>
+                        </tr>
+                    </tbody>
+            <tbody>
+
+                
+                <tr class="clickable" data-toggle="collapse" data-target="#group-of-rows-2" aria-expanded="false" aria-controls="group-of-rows-2">
+                    <td><i class="fa fa-folder"></i></td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                </tr>
+            </tbody>
+                    <tbody id="group-of-rows-2" class="collapse">
+                        <tr class="table-warning">
+                            <td><i class="fa fa-folder-open"></i> child row</td>
+                            <td>data 2</td>
+                            <td>data 2</td>
+                            <td>data 2</td>
+                        </tr>
+                        <tr class="table-warning">
+                            <td><i class="fa fa-folder-open"></i> child row</td>
+                            <td>data 2</td>
+                            <td>data 2</td>
+                            <td>data 2</td>
+                        </tr>
+                    </tbody>
+    </table>
+
+
+
+
+
+
+    <h5>Credit Card Transactions</h5>
+
+    <table class="table table-dark">
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Account</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Category</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+            
+            {% for transaction in credit %}
+                <tr>
+                    <th scope="row">{{transaction.date}}</th>
+                    <td>{{transaction.accountid}}</td>
+                    <td>{{transaction.amount}}</td>
+                    <td>{{transaction.category}}</td>
+                    <td>{{transaction.description}}</td>
+                </tr>
+            {% endfor %}
+
+        </tbody>
+
+      </table>
+
+
 
 
 
