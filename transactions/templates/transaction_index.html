@@ -1,10 +1,66 @@
 {% extends "base.html" %}
 {% block page_content %}
 
+<head>
+    <title>All Transactions</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+
+</head>
+
 <h1>Transactions</h1>
 <div class="row">
 
-    <table class="table table-bordered table-sm table-dark ">
+    <div class="container-fluid">
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="checking-tab" data-bs-toggle="tab" data-bs-target="#checking" type="button" role="tab" aria-controls="checking" aria-selected="true">Checking Transactions</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="credit-tab" data-bs-toggle="tab" data-bs-target="#credit" type="button" role="tab" aria-controls="credit" aria-selected="false">Credit Transactions</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="saving-tab" data-bs-toggle="tab" data-bs-target="#saving" type="button" role="tab" aria-controls="saving" aria-selected="false">Saving Transactions</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="investment-tab" data-bs-toggle="tab" data-bs-target="#investment" type="button" role="tab" aria-controls="investment" aria-selected="false">Investment Transactions</button>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="checking" role="tabpanel" aria-labelledby="checking-tab">Credit Transactions</div>
+            <div class="tab-pane fade" id="credit" role="tabpanel" aria-labelledby="credit-tab"> 
+                <table class="table table-striped table-bordered ">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Account</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in credit %}
+                        <tr>
+                            <th scope="row">{{transaction.date}}</th>
+                            <td>{{transaction.accountid}}</td>
+                            <td>{{transaction.amount}}</td>
+                            <td>{{transaction.category}}</td>
+                            <td>{{transaction.description}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            <div class="tab-pane fade" id="saving" role="tabpanel" aria-labelledby="saving-tab">.sdsds.</div>
+            <div class="tab-pane fade" id="investment" role="tabpanel" aria-labelledby="investment-tab">.sdsds.</div>
+    </div>
+
+
+    <!-- <table class="table table-striped table-bordered ">
         <thead class="thead-dark">
             <tr>
                 <th scope="col">Date</th>
@@ -16,10 +72,11 @@
         </thead>
             <tbody>
                 <tr class="clickable" data-toggle="collapse" data-target="#group-of-rows-1" aria-expanded="false" aria-controls="group-of-rows-1">
-                    <td><i class="fa fa-folder">Credit Card Transactions</i></td>
-                    <td>data</td>
-                    <td>data</td>
-                    <td>data</td>
+                    <td><b>Credit Card Transactions</b></td>
+                    <td> </td>
+                    <td> </td>
+                    <td> </td>
+                    <td> </td>
                 </tr>
             </tbody>
                     <tbody id="group-of-rows-1" class="collapse">
@@ -32,45 +89,34 @@
                             <td>{{transaction.description}}</td>
                         </tr>
                         {% endfor %}
-                        <tr class="table-warning">
-                            <td><i class="fa fa-folder-open"></i> child row</td>
-                            <td>data 1</td>
-                            <td>data 1</td>
-                            <td>data 1</td>
-                        </tr>
                     </tbody>
             <tbody>
 
                 
-                <tr class="clickable" data-toggle="collapse" data-target="#group-of-rows-2" aria-expanded="false" aria-controls="group-of-rows-2">
-                    <td><i class="fa fa-folder"></i></td>
-                    <td>data</td>
-                    <td>data</td>
-                    <td>data</td>
+            <tbody>
+                <tr class="clickable" data-toggle="collapse" data-target="#group-of-rows-1" aria-expanded="false" aria-controls="group-of-rows-1">
+                    <td><b>Credit Card Transactions</b></td>
+                    <td> </td>
+                    <td> </td>
+                    <td> </td>
+                    <td> </td>
                 </tr>
             </tbody>
-                    <tbody id="group-of-rows-2" class="collapse">
-                        <tr class="table-warning">
-                            <td><i class="fa fa-folder-open"></i> child row</td>
-                            <td>data 2</td>
-                            <td>data 2</td>
-                            <td>data 2</td>
+                    <tbody id="group-of-rows-1" class="collapse">
+                        {% for transaction in credit %}
+                        <tr>
+                            <th scope="row">{{transaction.date}}</th>
+                            <td>{{transaction.accountid}}</td>
+                            <td>{{transaction.amount}}</td>
+                            <td>{{transaction.category}}</td>
+                            <td>{{transaction.description}}</td>
                         </tr>
-                        <tr class="table-warning">
-                            <td><i class="fa fa-folder-open"></i> child row</td>
-                            <td>data 2</td>
-                            <td>data 2</td>
-                            <td>data 2</td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
-    </table>
+            <tbody>
+</table> -->
 
-
-
-
-
-
-    <h5>Credit Card Transactions</h5>
+    <!-- <h5>Credit Card Transactions</h5>
 
     <table class="table table-dark">
         <thead>
@@ -96,11 +142,7 @@
 
         </tbody>
 
-      </table>
-
-
-
-
+      </table> -->
 
 
 </div>

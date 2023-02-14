@@ -26,29 +26,38 @@ def transaction_index(request):
     #         creditTransactions.append(account)
 
     creditTransactions = None
-
     for account in creditAccounts:
         if creditTransactions is None:
             creditTransactions = Transaction.objects.filter(accountid=account.accountid).all()
         else:
             creditTransactions = creditTransactions | Transaction.objects.filter(accountid=account.accountid).all()
 
-    checkingTransactions = []
+    checkingTransactions = None
     for account in checkingAccounts:
-        checkingTransactions.append(account)
+        if checkingTransactions is None:
+            checkingTransactions = Transaction.objects.filter(accountid=account.accountid).all()
+        else:
+            checkingTransactions = checkingTransactions | Transaction.objects.filter(accountid=account.accountid).all()
 
-    savingTransactions = []
+    savingTransactions = None
     for account in savingsAccounts:
-        savingTransactions.append(account)
+        if savingTransactions is None:
+            savingTransactions = Transaction.objects.filter(accountid=account.accountid).all()
+        else:
+            savingTransactions = savingTransactions | Transaction.objects.filter(accountid=account.accountid).all()
 
-    investmentTransactions = []
+
+    investmentTransactions = None
     for account in investmentAccounts:
-        investmentTransactions.append(account)
+        if investmentTransactions is None:
+            investmentTransactions = Transaction.objects.filter(accountid=account.accountid).all()
+        else:
+            investmentTransactions = investmentTransactions | Transaction.objects.filter(accountid=account.accountid).all()
     #creditTransactions = Transaction.objects.filter(accountid=creditAccount['accountid'].value()).all()
 
     #creditAccounts = Account.get
 
-    context = {'transactions' : transactions, 'credit' : creditTransactions.order_by('-date')[0:50], 'checking' : checkingTransactions, 'saving' : savingTransactions, 'invest' : investmentTransactions}
+    context = {'transactions' : transactions, 'credit' : creditTransactions.order_by('-date')[0:50], 'checking' : checkingTransactions.order_by('-date'), 'saving' : savingTransactions.order_by('-date'), 'invest' : investmentTransactions.order_by('-date')}
 
     return render(request, 'transaction_index.html', context)
 
