@@ -30,7 +30,30 @@
             </li>
           </ul>
           <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade show active" id="checking" role="tabpanel" aria-labelledby="checking-tab">Credit Transactions</div>
+            <div class="tab-pane fade show active" id="checking" role="tabpanel" aria-labelledby="checking-tab">                
+                <table class="table table-striped table-bordered ">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Account</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in checking %}
+                        <tr>
+                            <th scope="row">{{transaction.date}}</th>
+                            <td>{{transaction.accountid}}</td>
+                            <td>{{transaction.amount}}</td>
+                            <td>{{transaction.category}}</td>
+                            <td>{{transaction.description}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             <div class="tab-pane fade" id="credit" role="tabpanel" aria-labelledby="credit-tab"> 
                 <table class="table table-striped table-bordered ">
                     <thead class="thead-dark">
@@ -54,9 +77,55 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                </div>
-            <div class="tab-pane fade" id="saving" role="tabpanel" aria-labelledby="saving-tab">.sdsds.</div>
-            <div class="tab-pane fade" id="investment" role="tabpanel" aria-labelledby="investment-tab">.sdsds.</div>
+            </div>
+            <div class="tab-pane fade" id="saving" role="tabpanel" aria-labelledby="saving-tab">
+                <table class="table table-striped table-bordered ">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Account</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in saving %}
+                        <tr>
+                            <th scope="row">{{transaction.date}}</th>
+                            <td>{{transaction.accountid}}</td>
+                            <td>{{transaction.amount}}</td>
+                            <td>{{transaction.category}}</td>
+                            <td>{{transaction.description}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-pane fade" id="investment" role="tabpanel" aria-labelledby="investment-tab">
+                <table class="table table-striped table-bordered ">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Account</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in invest %}
+                        <tr>
+                            <th scope="row">{{transaction.date}}</th>
+                            <td>{{transaction.accountid}}</td>
+                            <td>{{transaction.amount}}</td>
+                            <td>{{transaction.category}}</td>
+                            <td>{{transaction.description}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
     </div>
 
 
