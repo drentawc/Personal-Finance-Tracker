@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -49,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'finance_tracker.middleware.lockdown.RequireLoginMiddleware',
 ]
 
 ROOT_URLCONF = 'finance_tracker.urls'
@@ -56,7 +58,7 @@ ROOT_URLCONF = 'finance_tracker.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ["finance_tracker/templates/"],
+        'DIRS': [os.path.join(BASE_DIR, 'finance_tracker/templates/')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -130,3 +132,15 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+#Adding for login requirement
+LOGIN_REDIRECT_URL = "/accounts/"
+LOGIN_URL='/log/login/'
+LOGIN_REQUIRED_URLS = (
+    r'/(.*)$',
+)
+LOGIN_REQUIRED_URLS_EXCEPTIONS = (
+    r'/log/login(.*)$',
+    r'/log/logout(.*)$',
+)
