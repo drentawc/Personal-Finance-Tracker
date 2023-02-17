@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block page_content %}
+
+<head>
+    <title>Personal Finance Tracker</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<h1>Personal Finance Tracker</h1>
+<h5>Powered by Mint, Python, and Django</h5>
+<br>
+<!-- <a href="{% url 'login' %}">Login</a> -->
+
+<!-- {% block title %}Home{% endblock %} -->
+
+{% if user.is_authenticated %}
+  Welcome {{ user.username }}!
+  <br>
+  <h6><a href="{% url 'account_index' %}">Accounts</a></h6>
+  <br>
+  <h6><a href="{% url 'transaction_index' %}">Transactions</a></h6>
+
+  <p><a href="{% url 'logout' %}">Log Out</a></p>
+
+{% else %}
+  <p>Welcome! Please login below: </p>
+  <a href="{% url 'login' %}">Login</a>
+{% endif %}
+<br>
+
+{% endblock %}

@@ -8,9 +8,8 @@
 
 import mintapi as mintapi
 import pandas as pd
-import secrets
 import pymysql
-
+from plot import Plot
 
 #Possible methods:
 # self.mintAuth.get_net_worth_data(), 
@@ -33,6 +32,8 @@ class MintBackend:
 
         self.importToSql()
 
+        self.generatePlots("asd")
+
 
     #Helper method to organize all transactions into months
     def organizeTransactions(self):
@@ -41,6 +42,9 @@ class MintBackend:
     #Helper to get month of transaction data
     def getTransactionMonth(self, date):
         ""
+
+    def generatePlots(self, year):
+        self.plot = Plot(self.yearDict[year], self.config['Imgur'], year)
 
     #Set current user to be sent to MySQL database
     def setUser(self):
@@ -82,17 +86,17 @@ class MintBackend:
         #Loop through all transactions in DataFrame
         for index, row in self.transactions.iterrows():
 
-            if index < 10:
+            # if index < 10:
 
-                print(row)
+            #     print(row)
                 
-                print(row['accountRef'])
+            #     print(row['accountRef'])
 
-                print(row['fiData'])
+            #     print(row['fiData'])
 
-                print(row['category'])
+            #     print(row['category'])
 
-                print()
+            #     print()
 
             #Seperate all transactions by account ID
 
@@ -120,7 +124,11 @@ class MintBackend:
             elif "Credit" in row['accountRef']['type']:
                 self.creditTransactions = pd.concat([self.creditTransactions, entry], axis = 0)
                 self.allTransactions = pd.concat([self.creditTransactions, entry], axis = 0)
+
             else:
+
+                print(row['accountRef']['type'])
+
                 self.savingsTransactions = pd.concat([self.savingsTransactions, entry], axis = 0)
                 self.allTransactions = pd.concat([self.savingsTransactions, entry], axis = 0)
 

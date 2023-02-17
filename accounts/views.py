@@ -1,10 +1,8 @@
 from django.shortcuts import render
 from accounts.models import User, Account
+from transactions.models import Transaction
 
 # Create your views here.
-
-
-#
 
 def account_index(request):
     accounts = Account.objects.all()
@@ -22,8 +20,9 @@ def account_index(request):
 
 
 def account_detail(request, pk):
-    accounts = Account.objects.get(pk=pk)
+    account = Account.objects.get(pk=pk)
+    transactions = Transaction.objects.filter(accountid=account.accountid).all()
 
-    context = {'accounts' : accounts}
+    context = {'account' : account, 'transactions' : transactions.order_by('-date')}
 
     return render(request, 'account_detail.html', context)

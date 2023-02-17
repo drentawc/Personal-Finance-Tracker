@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'transactions',
+    'homepage',
 ]
 
 MIDDLEWARE = [
@@ -50,7 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'finance_tracker.middleware.lockdown.RequireLoginMiddleware',
+    'finance_tracker.middleware.lockdown.RequireLoginMiddleware', #- may need to reenable this later
 ]
 
 ROOT_URLCONF = 'finance_tracker.urls'
@@ -136,11 +137,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #Adding for login requirement
 LOGIN_REDIRECT_URL = "/accounts/"
+LOGOUT_REDIRECT_URL = "/"
+
 LOGIN_URL='/log/login/'
+
+
 LOGIN_REQUIRED_URLS = (
     r'/(.*)$',
 )
 LOGIN_REQUIRED_URLS_EXCEPTIONS = (
+    r'/$',
     r'/log/login(.*)$',
     r'/log/logout(.*)$',
 )

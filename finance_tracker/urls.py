@@ -17,6 +17,11 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
+
+    #@TODO figure out if want homepage as seperate django app or just as template, might be nice to have as seperate app for models
+
+    #path("", TemplateView.as_view(template_name="home.html"), name="home"),
+    path('', include("homepage.urls")),
     path('admin/', admin.site.urls),
     path('log/', include("django.contrib.auth.urls")),
     path('accounts/', include("accounts.urls")),

@@ -25,7 +25,7 @@
 
             </ul>
             <div class="card-body">
-                <a href="#" class="card-link">Card link</a>
+                
             </div>
         </div>
 
@@ -39,7 +39,7 @@
 
 
             {% for account in credit %}
-                <li class="list-group-item">{{ account.bankname}}   |   {{ account.lastfour}}   |   {{ account.balance}} | <a href="#" class="card-link">Transactions</a></li>
+                <li class="list-group-item">{{ account.bankname}}   |   {{ account.lastfour}}   |   {{ account.balance}} | <a href="{% url 'account_detail' account.pk %}" class="card-link">Account Details</a></li>
             {% endfor %}
 
             </ul>
