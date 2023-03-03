@@ -9,6 +9,7 @@
 import mintapi as mintapi
 import pandas as pd
 import pymysql
+from datetime import datetime
 from plot import Plot
 
 #Possible methods:
@@ -20,17 +21,17 @@ class MintBackend:
     def __init__(self, config):
 
         self.config = config
-        self.mintAuth = self.connectToMint()
+        #self.mintAuth = self.connectToMint()
 
         self.accounts = pd.DataFrame()
 
-        self.setUser()
+        # self.setUser()
 
-        self.setTransactions()
+        # self.setTransactions()
 
-        self.setAccounts()
+        # self.setAccounts()
 
-        self.importToSql()
+        # self.importToSql()
 
         self.generatePlots("asd")
 
@@ -44,7 +45,91 @@ class MintBackend:
         ""
 
     def generatePlots(self, year):
-        self.plot = Plot(self.yearDict[year], self.config['Imgur'], year)
+
+        currentDate = datetime.today()
+
+        print(currentDate)
+
+        try:
+            self.connection = pymysql.connect(host=self.config['Database']['host'], user=self.config['Database']['user'], password=self.config['Database']['password'], db=self.config['Database']['db'])
+
+            query = "Select Amount, Category from transactions WHERE MONTH(date) = {date} AND YEAR(date) = {year};".format(date=currentDate.strftime("%m"), year=2022) #currentDate.strftime("%Y"))
+            print(query)
+            resultDataFrame = pd.read_sql(query, self.connection)
+
+            resultDict = self.organizeTransactions(resultDataFrame)
+            print(resultDict)
+
+            print(resultDataFrame.head())
+
+            #yearPlot = Plot(resultDataFrame, self.config['Imgur'], year)
+
+            #yearPlot = Plot(resultDataFrame, "AnnualTransactions.png")
+
+            #yearPlot.createExpenseChart("Monthly Transactions")
+
+            self.connection.close() #close the connection
+
+
+        except Exception as e:
+            self.connection.close()
+            print(str(e))
+
+    def organizeTransactions(self, dataframe):
+
+        resultDict = {}
+
+        print(dataframe)
+
+        for index, row in dataframe.iterrows():
+
+            print(row['Category'])
+
+            if row['Category'] == "Air Travel" or row['Category'] == "Vacation" or row['Category'] == "Hotel" or row['Category'] == "Public Transportation" or row['Category'] == "Parking" \
+                or row['Category'] == "Ride Share" or row['Category'] == "Travel":
+                key = "Travel/Vacation"
+            elif row['Category'] == "Restaurants" or row['Category'] == "Food & Dining" or row['Category'] == "Alcohol & Bars" or row['Category'] == "Coffee Shops" or row['Category'] == "Fast Food":
+                key = "Food/Drinks"
+            elif row['Category'] == "Shopping" or row['Category'] == "Clothing" or row['Category'] == "Electronics & Software" or row['Category'] == "Hobbies" or row['Category'] == "Gift" \
+                or row['Category'] == "Mobile Phone" or row['Category'] == "Sporting Goods":
+                key = "Shopping"
+            elif row['Category'] == "Entertainment" or row['Category'] == "Music" or row['Category'] == "Books":
+                key = "Entertainment"
+            elif row['Category'] == "Business Services" or row['Category'] == "Doctor" or row['Category'] == "Child Support" or row['Category'] == "Uncategorized" or row['Category'] == "Bank Fee" or row['Category'] == "Taxes" \
+                or row['Category'] == "Uncategorized" or row['Category'] == "Amusement" or row['Category'] == "Shipping" or row['Category'] == "Home" or row['Category'] == "Tuition" or row['Category'] == "Pharmacy":
+                key = "Random"
+            else:
+                key = row['Category']
+
+            if row[0][0:4] not in resultDict:
+                resultDict[row[0][0:4]] = {}
+            if "Total" not in resultDict[row[0][0:4]]:
+                resultDict[row[0][0:4]]['Total'] = 0
+            if key not in resultDict[row[0][0:4]]:
+                resultDict[row[0][0:4]][key] = 0
+
+            # if datetime.strptime(startDate, "%Y-%m") <= datetime.strptime(row[0][0:7], "%Y-%m") <= datetime.strptime(endDate, "%Y-%m"):
+
+            #     #Initialize month dict keys
+            #     if row[0][0:7] not in self.monthDict:
+            #         self.monthDict[row[0][0:7]] = {}
+            #     if "Total" not in self.monthDict[row[0][0:7]]:
+            #         self.monthDict[row[0][0:7]]['Total'] = 0
+            #     if key not in self.monthDict[row[0][0:7]]:
+            #         self.monthDict[row[0][0:7]][key] = 0
+
+            #     self.monthDict[row[0][0:7]]["Total"] += float(row[2])
+            #     self.monthDict[row[0][0:7]][key] += float(row[2])
+
+            #     resultDict[row[0][0:4]]["Total"] += float(row[2])
+            #     resultDict[row[0][0:4]][key] += float(row[2])
+
+            # else:
+
+            # resultDict[row[0][0:4]]["Total"] += float(row[2])
+            # resultDict[row[0][0:4]][key] += float(row[2])
+
+        return resultDict
 
     #Set current user to be sent to MySQL database
     def setUser(self):
@@ -115,6 +200,25 @@ class MintBackend:
             data = { 'Date': [row['date']], 'Amount': [row['amount']], 'Category' : [row['category']['name']], 'Description': [row['description']], 'AccountNum' : [row['accountId']], 'TransactionId' : [row['id']]} #, 'Status': [row['status']]  } #, 'AccountRef': row['accountRef'] }
             #data = { 'Date': [row['date']], 'Account': [currentAccount], 'Amount': [row['amount']], 'Category' : [row['category']], 'Description': [row['description']], 'Status': [row['status']]  } #, 'AccountRef': row['accountRef'] }
             entry = pd.DataFrame( data )
+
+            #Should maybe change this for categories
+
+            #Append certain categories together 
+            # if row['Category'] == "Air Travel" or row['Category'] == "Vacation" or row['Category'] == "Hotel" or row['Category'] == "Public Transportation" or row['Category'] == "Parking" \
+            #     or row['Category'] == "Ride Share" or row['Category'] == "Travel":
+            #     key = "Travel/Vacation"
+            # elif row['Category'] == "Restaurants" or row['Category'] == "Food & Dining" or row['Category'] == "Alcohol & Bars" or row['Category'] == "Coffee Shops" or row['Category'] == "Fast Food":
+            #     key = "Food/Drinks"
+            # elif row['Category'] == "Shopping" or row['Category'] == "Clothing" or row['Category'] == "Electronics & Software" or row['Category'] == "Hobbies" or row['Category'] == "Gift" \
+            #     or row['Category'] == "Mobile Phone" or row['Category'] == "Sporting Goods":
+            #     key = "Shopping"
+            # elif row['Category'] == "Entertainment" or row['Category'] == "Music" or row['Category'] == "Books":
+            #     key = "Entertainment"
+            # elif row['Category'] == "Business Services" or row['Category'] == "Doctor" or row['Category'] == "Child Support" or row['Category'] == "Uncategorized" or row['Category'] == "Bank Fee" or row['Category'] == "Taxes" \
+            #     or row['Category'] == "Uncategorized" or row['Category'] == "Amusement" or row['Category'] == "Shipping" or row['Category'] == "Home" or row['Category'] == "Tuition" or row['Category'] == "Pharmacy":
+            #     key = "Random"
+            # else:
+            #     key = row['Category']
 
             #entry = entry.fillna('')
 
@@ -267,6 +371,8 @@ class MintBackend:
         self.insertAccounts()
 
         self.insertTransactions()
+
+        self.connection.close()
 
 
 

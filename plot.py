@@ -5,7 +5,7 @@ from glob import glob
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import imgurpython
+#import imgurpython
 
 
 #Unused currently
@@ -20,13 +20,15 @@ from base64 import b64decode
 
 class Plot:
 
-    def __init__(self, data, config, name):
+    def __init__(self, data, name):
 
         self.data = data
-        self.config = config
+        #self.config = config
         self.name = name
 
-        self.imageDir = "/home/will/code/Personal-Finance-Tracker/images/"
+        self.imageDir = os.getcwd() + "/finance_tracker/static/"
+
+        print(self.imageDir)
 
 
 
@@ -42,30 +44,36 @@ class Plot:
 
     def createExpenseChart(self, figureTitle):
 
-        print(self.data)
+        print(self.data.head())
 
         #Get labels and data from passed dict, exclude first element which is total amount
-        labels = list(self.data.keys())[1:]
-        data = [abs(x) for x in list(self.data.values())][1:]
+        labels = list(self.data.keys())
+        #data = [abs(x) for x in list(self.data.values())][1:]
+
+        print(labels)
+
+        print("made it here ")
         
         # color = []
         # for label in labels:
 
-        print(labels)
+        # print(labels)
 
-        print(data)
+        # print(data)
 
         #Figsize of 7.5 seems to be the best middle ground of resolution to readability, 10 add more info but with increased resolution appears blurry on google sheets, can maybe
         # look into compressing these images before uploading to imgur / gsheets to see if it would have any benefit to image quality
 
-        fig = plt.figure(figsize=(7.5,7.5))
+        fig = plt.figure(figsize=(10,10))
 
         plt.title(figureTitle)
 
         plt.rcParams['figure.dpi'] = 300
         plt.rcParams['savefig.dpi'] = 300
 
-        plt.pie(data, autopct='%.0f%%', startangle=90)
+        print("made it here ")
+
+        plt.pie(self.data, autopct='%.0f%%', startangle=90)
 
         plt.legend(labels, bbox_to_anchor=(0.85,0.6))
 
@@ -76,13 +84,13 @@ class Plot:
 
 
     #Need to add to update same link of image 
-    def uploadToImgur(self):
+    # def uploadToImgur(self):
 
-        client = imgurpython.ImgurClient(self.config['client_id'], self.config["client_secret"])#, self.config['access_token'], self.config['refresh_token'])
+    #     client = imgurpython.ImgurClient(self.config['client_id'], self.config["client_secret"])#, self.config['access_token'], self.config['refresh_token'])
 
-        asd = client.upload_from_path(self.imageName, anon=False)
+    #     asd = client.upload_from_path(self.imageName, anon=False)
 
-        return asd['link']
+    #     return asd['link']
 
 
     def removeImages(self):
