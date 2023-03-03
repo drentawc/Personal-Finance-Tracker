@@ -53,20 +53,22 @@ class MintBackend:
         try:
             self.connection = pymysql.connect(host=self.config['Database']['host'], user=self.config['Database']['user'], password=self.config['Database']['password'], db=self.config['Database']['db'])
 
+
+            #Get previous month's transactions
             query = "Select Amount, Category from transactions WHERE MONTH(date) = {date} AND YEAR(date) = {year};".format(date=currentDate.strftime("%m"), year=2022) #currentDate.strftime("%Y"))
-            print(query)
+            #print(query)
             resultDataFrame = pd.read_sql(query, self.connection)
 
-            resultDict = self.organizeTransactions(resultDataFrame)
+            resultDict = self.organizeTransactions(resultDataFrame, True)
             print(resultDict)
 
-            print(resultDataFrame.head())
+            #print(resultDataFrame.head())
 
             #yearPlot = Plot(resultDataFrame, self.config['Imgur'], year)
 
-            #yearPlot = Plot(resultDataFrame, "AnnualTransactions.png")
+            yearPlot = Plot(resultDict, "AnnualTransactions.png")
 
-            #yearPlot.createExpenseChart("Monthly Transactions")
+            yearPlot.createExpenseChart("Monthly Expenses")
 
             self.connection.close() #close the connection
 
@@ -75,15 +77,13 @@ class MintBackend:
             self.connection.close()
             print(str(e))
 
-    def organizeTransactions(self, dataframe):
+    def organizeTransactions(self, dataframe, chargeFlag):
 
         resultDict = {}
 
-        print(dataframe)
+        #print(dataframe)
 
         for index, row in dataframe.iterrows():
-
-            print(row['Category'])
 
             if row['Category'] == "Air Travel" or row['Category'] == "Vacation" or row['Category'] == "Hotel" or row['Category'] == "Public Transportation" or row['Category'] == "Parking" \
                 or row['Category'] == "Ride Share" or row['Category'] == "Travel":
@@ -95,18 +95,23 @@ class MintBackend:
                 key = "Shopping"
             elif row['Category'] == "Entertainment" or row['Category'] == "Music" or row['Category'] == "Books":
                 key = "Entertainment"
+            elif row['Category'] == "Buy":
+                key = "Investment Transfer"
+            elif row['Category'] == "Transfer for Cash Spending" or row['Category'] == "Cash & ATM":
+                key = "Cash Withdrawal/Account Transfer"
             elif row['Category'] == "Business Services" or row['Category'] == "Doctor" or row['Category'] == "Child Support" or row['Category'] == "Uncategorized" or row['Category'] == "Bank Fee" or row['Category'] == "Taxes" \
                 or row['Category'] == "Uncategorized" or row['Category'] == "Amusement" or row['Category'] == "Shipping" or row['Category'] == "Home" or row['Category'] == "Tuition" or row['Category'] == "Pharmacy":
                 key = "Random"
             else:
                 key = row['Category']
 
-            if row[0][0:4] not in resultDict:
-                resultDict[row[0][0:4]] = {}
-            if "Total" not in resultDict[row[0][0:4]]:
-                resultDict[row[0][0:4]]['Total'] = 0
-            if key not in resultDict[row[0][0:4]]:
-                resultDict[row[0][0:4]][key] = 0
+            # if "Total" not in resultDict:
+            #     resultDict['Total'] = 0
+            if key not in resultDict:
+                resultDict[key] = 0
+
+            resultDict[key] += row['Amount']
+            #resultDict['Total'] += row['Amount']
 
             # if datetime.strptime(startDate, "%Y-%m") <= datetime.strptime(row[0][0:7], "%Y-%m") <= datetime.strptime(endDate, "%Y-%m"):
 
@@ -128,6 +133,24 @@ class MintBackend:
 
             # resultDict[row[0][0:4]]["Total"] += float(row[2])
             # resultDict[row[0][0:4]][key] += float(row[2])
+
+        # print(resultDict)
+
+        # print(chargeFlag)
+
+        #If chargeFlag is True, remove all positive transactions as only want to view charges
+        if chargeFlag:
+
+            tempDict = resultDict.copy()
+
+            for key in tempDict:
+
+                if resultDict[key] >= 0 and key != "Total":
+                    #print(resultDict[key])
+                    #resultDict['Total'] -= resultDict.copy()[key]
+                    resultDict.pop(key)
+
+        #print(resultDict)
 
         return resultDict
 

@@ -28,14 +28,11 @@ class Plot:
 
         self.imageDir = os.getcwd() + "/finance_tracker/static/"
 
-        print(self.imageDir)
 
-
-
-        self.imageName = "{0}{1}_expenses.png".format(self.imageDir, self.name)
+        self.imageName = "{0}{1}".format(self.imageDir, self.name)
 
         self.checkImageDirectory()
-        self.removeImages()
+        #self.removeImages()
 
 
         #self.imgurClient = imgurpython.ImgurClient(self.config["client_id"], self.config["client_secret"])
@@ -44,22 +41,29 @@ class Plot:
 
     def createExpenseChart(self, figureTitle):
 
-        print(self.data.head())
+        #print(self.data.head())
 
         #Get labels and data from passed dict, exclude first element which is total amount
         labels = list(self.data.keys())
-        #data = [abs(x) for x in list(self.data.values())][1:]
+        data = [abs(x) for x in list(self.data.values())]
+        #data.sort(reverse=True)
+
+
+        myexplode = []
+        for ind,val in enumerate(data):
+            if ind == 0:
+                myexplode.append(0.05)
+            else:
+                myexplode.append(0.1)
+        #data = list(self.data.values())
 
         print(labels)
-
-        print("made it here ")
+        print(data)
         
         # color = []
         # for label in labels:
 
         # print(labels)
-
-        # print(data)
 
         #Figsize of 7.5 seems to be the best middle ground of resolution to readability, 10 add more info but with increased resolution appears blurry on google sheets, can maybe
         # look into compressing these images before uploading to imgur / gsheets to see if it would have any benefit to image quality
@@ -73,11 +77,18 @@ class Plot:
 
         print("made it here ")
 
-        plt.pie(self.data, autopct='%.0f%%', startangle=90)
+        plt.pie(data, autopct='%.0f%%', pctdistance=0.9, explode=myexplode, startangle=90)
 
-        plt.legend(labels, bbox_to_anchor=(0.85,0.6))
 
-        
+        plt.legend(labels, title="Transaction Type", loc='lower right', bbox_to_anchor=(1.1, -0.1))#bbox_to_anchor=(1, 1), loc=1, borderaxespad=0)
+
+        #plt.subplots_adjust(left=0.1, bottom=0.1, right=0.75)
+
+        #plt.setp(autotexts, size=8, weight="bold")
+
+        #plt.axis('equal')
+
+        print(self.imageName)
 
         plt.savefig(self.imageName)
 
